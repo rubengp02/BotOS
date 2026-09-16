@@ -24,4 +24,4 @@ jobs:
       - name: Run contract tests
         run: python -m unittest discover -s tests -v
       - name: Check JavaScript syntax
-        run: node --check js/app.js
+        run: for f in js/**/*.js; do node --check "$f"; done
