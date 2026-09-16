@@ -194,7 +194,7 @@ def validate_required_markers() -> list[str]:
     readme_text = (ROOT / "README.md").read_text(encoding="utf-8")
     required = {
         "index.html": ("PUBLIC DEMO", "SYNTHETIC / NO LIVE DATA", "data/demo_portfolio.json"),
-        "README.md": ("Public Synthetic Demo", "datos sinteticos", "synthetic data"),
+        "README.md": ("Public Synthetic Demo", "datos sintéticos", "synthetic data"),
     }
     for file_name, markers in required.items():
         text = index_text if file_name == "index.html" else readme_text
