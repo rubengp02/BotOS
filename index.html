@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<!-- Public portfolio edition derived from dashboard_portfolio_quant.html.
+     Production bindings and operational content are intentionally excluded.
+     Public data contract: data/demo_portfolio.json -->
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BotOS Public Demo: portfolio engineering dashboard with deterministic synthetic data.">
+  <meta name="theme-color" content="#0d0f17">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <title>BotOS | Public Synthetic Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#0c0e14',
+              card: '#141822',
+              border: '#1e2533',
+              accent: '#4f8cff',
+              mint: '#42d6a4',
+              amber: '#f6b94a'
+            }
+          },
+          fontFamily: {
+            mono: ['"IBM Plex Mono"', 'monospace'],
+            sans: ['"Manrope"', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      color-scheme: dark;
+      --bg: #0d0f17;
+      --card: #131722;
+      --card-raised: #171c29;
+      --border: #20293a;
+      --muted: #8894a7;
+      --text: #e8edf5;
+      --accent: #4f8cff;
+      --mint: #42d6a4;
+      --amber: #f6b94a;
+      --rose: #ff6b88;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(circle at 78% -8%, rgba(79, 140, 255, 0.14), transparent 32rem),
+        radial-gradient(circle at -8% 34%, rgba(66, 214, 164, 0.07), transparent 28rem),
+        var(--bg);
+      color: var(--text);
+      font-family: 'Manrope', sans-serif;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0d0f17; }
+    ::-webkit-scrollbar-thumb { background: #283348; border-radius: 99px; }
+
+    .glass {
+      background: rgba(15, 18, 26, 0.88);
+      backdrop-filter: blur(18px);
+    }
+
+    .panel {
+      background: linear-gradient(145deg, rgba(20, 25, 36, 0.98), rgba(15, 19, 28, 0.98));
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+    }
+
+    .kpi-card {
+      min-height: 86px;
+      background: linear-gradient(155deg, #151a26, #10141d);
+      border: 1px solid #222c3e;
+      border-radius: 14px;
+      padding: 13px 15px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      right: -28px;
+      top: -32px;
+      background: var(--glow, rgba(79, 140, 255, 0.15));
+      filter: blur(6px);
+      border-radius: 50%;
+    }
+
+    .nav-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 0.65rem;
+      color: #8995a9;
+      border: 1px solid transparent;
+      white-space: nowrap;
+      transition: 160ms ease;
+    }
+
+    .nav-tab:hover { color: #e8edf5; background: #151b27; }
+    .nav-tab.active {
+      color: #f8fbff;
+      background: rgba(79, 140, 255, 0.12);
+      border-color: rgba(79, 140, 255, 0.42);
+      box-shadow: inset 0 -2px 0 var(--accent);
+    }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; animation: rise 360ms ease both; }
+
+    .status-dot { box-shadow: 0 0 0 4px rgba(66, 214, 164, 0.09); }
+    .metric-bar { transition: width 520ms cubic-bezier(.2, .8, .2, 1); }
+    .strategy-row { transition: background 140ms ease, border-color 140ms ease; }
+    .strategy-row:hover { background: #171d2a; border-color: #2d3a52; }
+
+    .pipeline-column {
+      min-height: 290px;
+      background: rgba(10, 13, 20, 0.62);
+      border: 1px solid #1c2535;
+      border-radius: 15px;
+    }
+
+    .pipeline-card {
+      background: linear-gradient(145deg, #171d29, #121722);
+      border: 1px solid #263248;
+      border-left: 3px solid var(--card-accent, #4f8cff);
+      border-radius: 11px;
+      padding: 12px;
+      animation: rise 360ms ease both;
+    }
+
+    .corr-cell {
+      min-width: 58px;
+      padding: 0.7rem 0.45rem;
+      text-align: center;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      border: 1px solid #192131;
+    }
+
+    .demo-watermark {
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 50;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:bg-white focus:text-black focus:px-3 focus:py-2 focus:rounded-lg">
+    <span data-i18n="skip">Saltar al contenido</span>
+  </a>
+
+  <header class="glass sticky top-0 z-40 border-b border-[#1b2332] shadow-2xl">
+    <div class="max-w-[1680px] mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-emerald-400/10 border border-blue-400/30 flex items-center justify-center shadow-lg shadow-blue-950/40">
+          <i data-lucide="orbit" class="w-5 h-5 text-blue-300" aria-hidden="true"></i>
+        </div>
+        <div class="min-w-0 max-w-[205px] sm:max-w-none">
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-white tracking-tight">BotOS</h1>
+            <span class="text-[9px] font-mono font-semibold px-2 py-0.5 rounded-full bg-blue-950/60 text-blue-300 border border-blue-700/50">PUBLIC DEMO</span>
+          </div>
+          <p class="hidden sm:block text-[10px] sm:text-xs text-slate-400 truncate" data-i18n="subtitle">Sistema de ingenieria de portfolios cuantitativos</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 ml-auto">
+        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-950/30 border border-emerald-800/50 text-[10px] font-mono text-emerald-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 status-dot"></span>
+          <span data-i18n="syntheticStatus">DATOS SINTETICOS VERIFICADOS</span>
+        </div>
+        <button id="languageToggle" type="button" class="px-3 py-2 rounded-xl bg-[#151b27] hover:bg-[#1c2433] border border-[#29354a] text-xs font-bold text-slate-200 transition" aria-label="Change language">
+          EN
+        </button>
+        <a href="https://github.com/rubengp02/BotOS" class="hidden sm:inline-flex p-2 rounded-xl bg-[#151b27] hover:bg-[#1c2433] border border-[#29354a] text-slate-300 hover:text-white transition" aria-label="GitHub repository">
+          <i data-lucide="github" class="w-4 h-4" aria-hidden="true"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="border-b border-amber-900/40 bg-amber-950/20">
+    <div class="max-w-[1680px] mx-auto px-4 sm:px-6 py-2.5 flex items-start sm:items-center gap-2 text-[11px] sm:text-xs text-amber-100/85">
+      <i data-lucide="flask-conical" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5 sm:mt-0" aria-hidden="true"></i>
+      <p data-i18n="disclaimer">Entorno demostrativo aislado. Todos los nombres, mercados, eventos y resultados son ficticios y se generan de forma determinista.</p>
+    </div>
+  </div>
+
+  <nav class="border-b border-[#182131] bg-[#0b0e15]/95" aria-label="Dashboard sections">
+    <div class="max-w-[1680px] mx-auto px-4 sm:px-6 py-2 flex gap-1 overflow-x-auto">
+      <button type="button" class="nav-tab active" data-tab="overview"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span data-i18n="navOverview">Resumen</span></button>
+      <button type="button" class="nav-tab" data-tab="pipeline"><i data-lucide="git-branch" class="w-4 h-4"></i><span data-i18n="navPipeline">Pipeline</span></button>
+      <button type="button" class="nav-tab" data-tab="portfolio"><i data-lucide="pie-chart" class="w-4 h-4"></i><span data-i18n="navPortfolio">Portfolio</span></button>
+      <button type="button" class="nav-tab" data-tab="audit"><i data-lucide="shield-check" class="w-4 h-4"></i><span data-i18n="navAudit">Auditoria</span></button>
+      <button type="button" class="nav-tab" data-tab="architecture"><i data-lucide="blocks" class="w-4 h-4"></i><span data-i18n="navArchitecture">Arquitectura</span></button>
+    </div>
+  </nav>
+
+  <main id="main-content" class="max-w-[1680px] mx-auto w-full px-4 sm:px-6 py-6">
+    <section id="tab-overview" class="tab-pane active space-y-5">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+        <div>
+          <p class="text-xs font-mono text-blue-300 uppercase tracking-[0.18em]" data-i18n="overviewEyebrow">Control plane / demo segura</p>
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mt-1" data-i18n="overviewTitle">Una vista operativa, sin exponer el motor privado</h2>
+          <p class="text-sm text-slate-400 mt-2 max-w-3xl" data-i18n="overviewCopy">La demo reproduce la experiencia de supervision, validacion y trazabilidad con un dataset completamente inventado.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <select id="scenarioSelect" class="bg-[#121722] border border-[#283449] rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40" aria-label="Demo scenario">
+            <option value="baseline" data-i18n="scenarioBaseline">Escenario base</option>
+            <option value="stress" data-i18n="scenarioStress">Estres sintetico</option>
+            <option value="recovery" data-i18n="scenarioRecovery">Recuperacion sintetica</option>
+          </select>
+          <button id="runCycleButton" type="button" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-950/50 transition">
+            <i data-lucide="play" class="w-3.5 h-3.5"></i><span data-i18n="runCycle">Ejecutar ciclo demo</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3" id="kpiGrid">
+        <article class="kpi-card" style="--glow: rgba(79, 140, 255, .2)">
+          <p class="text-[10px] font-bold tracking-wider text-slate-500 uppercase" data-i18n="equity">Capital sintetico</p>
+          <p id="equityKpi" class="font-mono text-xl font-semibold text-white mt-2">--</p>
+          <p class="text-[10px] text-slate-500 mt-1" data-i18n="notAccount">No es una cuenta real</p>
+        </article>
+        <article class="kpi-card" style="--glow: rgba(66, 214, 164, .18)">
+          <p class="text-[10px] font-bold tracking-wider text-slate-500 uppercase" data-i18n="monthlyChange">Variacion del mes</p>
+          <p id="monthKpi" class="font-mono text-xl font-semibold text-emerald-300 mt-2">--</p>
+          <p id="dayKpi" class="text-[10px] text-slate-500 mt-1">--</p>
+        </article>
+        <article class="kpi-card" style="--glow: rgba(246, 185, 74, .18)">
+          <p class="text-[10px] font-bold tracking-wider text-slate-500 uppercase">Drawdown</p>
+          <p id="drawdownKpi" class="font-mono text-xl font-semibold text-amber-300 mt-2">--</p>
+          <div class="h-1.5 rounded-full bg-[#202838] mt-2 overflow-hidden"><div id="drawdownBar" class="metric-bar h-full bg-amber-400 rounded-full"></div></div>
+        </article>
+        <article class="kpi-card" style="--glow: rgba(114, 163, 255, .18)">
+          <p class="text-[10px] font-bold tracking-wider text-slate-500 uppercase" data-i18n="diversification">Diversificacion</p>
+          <p id="diversificationKpi" class="font-mono text-xl font-semibold text-blue-300 mt-2">--</p>
+          <p class="text-[10px] text-slate-500 mt-1" data-i18n="demoComposite">Indice compuesto demo</p>
+        </article>
+        <article class="kpi-card col-span-2 lg:col-span-1" style="--glow: rgba(66, 214, 164, .18)">
+          <p class="text-[10px] font-bold tracking-wider text-slate-500 uppercase" data-i18n="systemState">Estado del sistema</p>
+          <div class="flex items-center gap-2 mt-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 status-dot"></span><p class="font-mono text-sm font-semibold text-emerald-300" data-i18n="isolatedDemo">DEMO AISLADA</p></div>
+          <p id="cycleTime" class="text-[10px] text-slate-500 mt-2">--</p>
+        </article>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-5">
+        <article class="panel rounded-2xl p-4 sm:p-5 xl:col-span-8">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <h3 class="font-bold text-white" data-i18n="equityCurve">Curva sintetica del portfolio</h3>
+              <p class="text-xs text-slate-500 mt-1" data-i18n="illustrativeSeries">Serie ilustrativa; no procede de trading ni backtests reales.</p>
+            </div>
+            <span class="text-[9px] font-mono px-2 py-1 rounded-lg bg-blue-950/40 text-blue-300 border border-blue-800/50">SEED 260916</span>
+          </div>
+          <div class="h-[290px]"><canvas id="equityChart" aria-label="Synthetic equity chart"></canvas></div>
+        </article>
+
+        <article class="panel rounded-2xl p-4 sm:p-5 xl:col-span-4">
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <div>
+              <h3 class="font-bold text-white" data-i18n="decisionLog">Registro de decisiones</h3>
+              <p class="text-xs text-slate-500 mt-1" data-i18n="fictionalEvents">Eventos ficticios y trazables</p>
+            </div>
+            <i data-lucide="scroll-text" class="w-5 h-5 text-slate-500"></i>
+          </div>
+          <div id="eventFeed" class="space-y-3"></div>
+        </article>
+      </div>
+
+      <article class="panel rounded-2xl overflow-hidden">
+        <div class="p-4 sm:p-5 border-b border-[#20293a] flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 class="font-bold text-white" data-i18n="strategyMonitor">Monitor de modelos sinteticos</h3>
+            <p class="text-xs text-slate-500 mt-1" data-i18n="inventedNames">Identidades, mercados y metricas creados exclusivamente para esta demo.</p>
+          </div>
+          <span id="strategyCount" class="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-[#121722] text-slate-300 border border-[#263248]">--</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[860px] text-left">
+            <thead class="text-[10px] uppercase tracking-wider text-slate-500 bg-[#0d1119]">
+              <tr>
+                <th class="px-5 py-3" data-i18n="model">Modelo</th>
+                <th class="px-4 py-3" data-i18n="syntheticMarket">Mercado sintetico</th>
+                <th class="px-4 py-3" data-i18n="stage">Fase</th>
+                <th class="px-4 py-3" data-i18n="score">Score demo</th>
+                <th class="px-4 py-3" data-i18n="stability">Estabilidad</th>
+                <th class="px-4 py-3 text-right" data-i18n="allocation">Asignacion</th>
+                <th class="px-5 py-3 text-right" data-i18n="state">Estado</th>
+              </tr>
+            </thead>
+            <tbody id="strategyTableBody" class="divide-y divide-[#1b2433]"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section id="tab-pipeline" class="tab-pane space-y-5">
+      <div>
+        <p class="text-xs font-mono text-blue-300 uppercase tracking-[0.18em]" data-i18n="pipelineEyebrow">Flujo demostrativo</p>
+        <h2 class="text-2xl font-extrabold text-white mt-1" data-i18n="pipelineTitle">De la exploracion a la monitorizacion</h2>
+        <p class="text-sm text-slate-400 mt-2 max-w-3xl" data-i18n="pipelineCopy">Las transiciones son visuales y locales. Esta web no conecta con MetaTrader, brokers, cuentas ni servicios privados.</p>
+      </div>
+      <div id="pipelineBoard" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4"></div>
+    </section>
+
+    <section id="tab-portfolio" class="tab-pane space-y-5">
+      <div>
+        <p class="text-xs font-mono text-blue-300 uppercase tracking-[0.18em]" data-i18n="portfolioEyebrow">Diversificacion ilustrativa</p>
+        <h2 class="text-2xl font-extrabold text-white mt-1" data-i18n="portfolioTitle">Composicion y dependencias sinteticas</h2>
+      </div>
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+        <article class="panel rounded-2xl p-5">
+          <h3 class="font-bold text-white" data-i18n="allocationChart">Asignacion de demostracion</h3>
+          <p class="text-xs text-slate-500 mt-1" data-i18n="allocationCopy">Pesos inventados para mostrar la interfaz.</p>
+          <div class="h-[330px] mt-4"><canvas id="allocationChart" aria-label="Synthetic allocation chart"></canvas></div>
+        </article>
+        <article class="panel rounded-2xl p-5 overflow-hidden">
+          <h3 class="font-bold text-white" data-i18n="correlationMatrix">Matriz sintetica de correlacion</h3>
+          <p class="text-xs text-slate-500 mt-1" data-i18n="correlationCopy">Valores ficticios sin relacion con modelos privados.</p>
+          <div id="correlationMatrix" class="overflow-x-auto mt-6"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="tab-audit" class="tab-pane space-y-5">
+      <div>
+        <p class="text-xs font-mono text-blue-300 uppercase tracking-[0.18em]" data-i18n="auditEyebrow">Seguridad de publicacion</p>
+        <h2 class="text-2xl font-extrabold text-white mt-1" data-i18n="auditTitle">Controles de la edicion publica</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="auditCards">
+        <article class="panel rounded-2xl p-5"><i data-lucide="database-zap" class="w-6 h-6 text-emerald-300"></i><h3 class="font-bold text-white mt-4" data-i18n="syntheticOnly">Solo datos sinteticos</h3><p class="text-sm text-slate-400 mt-2" data-i18n="syntheticOnlyCopy">El repositorio publico no contiene exports, presets, historiales ni estados operativos.</p></article>
+        <article class="panel rounded-2xl p-5"><i data-lucide="unplug" class="w-6 h-6 text-blue-300"></i><h3 class="font-bold text-white mt-4" data-i18n="isolatedRuntime">Runtime aislado</h3><p class="text-sm text-slate-400 mt-2" data-i18n="isolatedRuntimeCopy">La demo es estatica y no llama al bridge local, MT5 ni APIs privadas.</p></article>
+        <article class="panel rounded-2xl p-5"><i data-lucide="scan-search" class="w-6 h-6 text-amber-300"></i><h3 class="font-bold text-white mt-4" data-i18n="automatedChecks">Comprobaciones automaticas</h3><p class="text-sm text-slate-400 mt-2" data-i18n="automatedChecksCopy">CI valida el esquema, los marcadores de demo y patrones sensibles antes del despliegue.</p></article>
+      </div>
+      <article class="panel rounded-2xl p-5">
+        <div class="flex items-center gap-3"><i data-lucide="badge-check" class="w-5 h-5 text-emerald-300"></i><h3 class="font-bold text-white" data-i18n="publicContract">Contrato publico</h3></div>
+        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-300">
+          <div class="p-3 rounded-xl bg-[#0d1119] border border-[#1e2838]" data-i18n="contractOne">Sin credenciales, correos, tokens ni identificadores personales.</div>
+          <div class="p-3 rounded-xl bg-[#0d1119] border border-[#1e2838]" data-i18n="contractTwo">Sin nombres, parametros, presets ni codigo de estrategias reales.</div>
+          <div class="p-3 rounded-xl bg-[#0d1119] border border-[#1e2838]" data-i18n="contractThree">Sin resultados de trading, backtests o evidencia MT5 reales.</div>
+          <div class="p-3 rounded-xl bg-[#0d1119] border border-[#1e2838]" data-i18n="contractFour">Sin conexion de escritura ni capacidad para ejecutar operaciones.</div>
+        </div>
+      </article>
+    </section>
+
+    <section id="tab-architecture" class="tab-pane space-y-5">
+      <div>
+        <p class="text-xs font-mono text-blue-300 uppercase tracking-[0.18em]" data-i18n="architectureEyebrow">Vista de portfolio tecnico</p>
+        <h2 class="text-2xl font-extrabold text-white mt-1" data-i18n="architectureTitle">Arquitectura publica desacoplada</h2>
+        <p class="text-sm text-slate-400 mt-2 max-w-3xl" data-i18n="architectureCopy">La edicion publica conserva la experiencia de producto y sustituye todas las integraciones privadas por un adaptador de datos sinteticos.</p>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-3 items-stretch">
+        <article class="panel rounded-2xl p-5"><span class="font-mono text-[10px] text-blue-300">01 / STATIC UI</span><h3 class="font-bold text-white mt-3" data-i18n="archUi">Dashboard reutilizado</h3><p class="text-sm text-slate-400 mt-2" data-i18n="archUiCopy">HTML, componentes visuales y navegacion adaptados del panel local.</p></article>
+        <article class="panel rounded-2xl p-5"><span class="font-mono text-[10px] text-blue-300">02 / ADAPTER</span><h3 class="font-bold text-white mt-3" data-i18n="archAdapter">Capa de demostracion</h3><p class="text-sm text-slate-400 mt-2" data-i18n="archAdapterCopy">JavaScript determinista transforma escenarios publicos sin red.</p></article>
+        <article class="panel rounded-2xl p-5"><span class="font-mono text-[10px] text-blue-300">03 / DATA</span><h3 class="font-bold text-white mt-3" data-i18n="archData">Dataset ficticio</h3><p class="text-sm text-slate-400 mt-2" data-i18n="archDataCopy">Un unico JSON auditable con identidades DEMO y mercados SYN.</p></article>
+        <article class="panel rounded-2xl p-5"><span class="font-mono text-[10px] text-blue-300">04 / DELIVERY</span><h3 class="font-bold text-white mt-3">GitHub Pages</h3><p class="text-sm text-slate-400 mt-2" data-i18n="archDeliveryCopy">Despliegue estatico reproducible, sin servidor ni secretos.</p></article>
+      </div>
+      <article class="panel rounded-2xl p-5 border-l-4 border-l-blue-500">
+        <p class="text-sm text-slate-300 leading-relaxed" data-i18n="architectureBoundary">El motor cuantitativo, los conectores de ejecucion, los datasets operativos y las reglas de promocion permanecen exclusivamente en el entorno local privado.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="border-t border-[#1b2332] mt-8">
+    <div class="max-w-[1680px] mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row justify-between gap-2 text-[11px] text-slate-500">
+      <p>BotOS Public Demo · <span data-i18n="footerSynthetic">Portfolio edition with synthetic data</span></p>
+      <p data-i18n="footerDisclaimer">Educational software demonstration. Not investment advice.</p>
+    </div>
+  </footer>
+
+  <div class="demo-watermark px-2.5 py-1 rounded-lg bg-[#0b0e15]/90 border border-[#28354a] text-[9px] font-mono tracking-widest text-slate-400">SYNTHETIC / NO LIVE DATA</div>
+
+  <div id="toast" class="fixed top-20 right-4 z-[60] max-w-sm translate-x-[120%] opacity-0 transition-all duration-300 panel rounded-xl px-4 py-3 text-xs text-slate-200" role="status" aria-live="polite"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

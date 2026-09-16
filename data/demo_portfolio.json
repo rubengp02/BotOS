@@ -1,0 +1,172 @@
+{
+  "schema_version": "public-demo-v1",
+  "dataset": {
+    "kind": "synthetic",
+    "seed": 260916,
+    "generated_for": "portfolio demonstration",
+    "disclaimer_es": "Datos totalmente sinteticos. No representan estrategias, cuentas, operaciones ni resultados reales.",
+    "disclaimer_en": "Fully synthetic data. It does not represent real strategies, accounts, trades, or results."
+  },
+  "portfolio": {
+    "base_equity": 100000,
+    "currency": "EUR",
+    "day_change_pct": 0.34,
+    "month_change_pct": 2.18,
+    "drawdown_pct": 1.72,
+    "diversification_score": 82,
+    "risk_state": "controlled",
+    "last_demo_cycle": "2026-09-16T09:30:00Z"
+  },
+  "equity_curve": [
+    100000,
+    100180,
+    100060,
+    100410,
+    100720,
+    100610,
+    101020,
+    100890,
+    101350,
+    101580,
+    101420,
+    101910,
+    102180
+  ],
+  "strategies": [
+    {
+      "id": "DEMO-HEL-01",
+      "name": "Helios Vector",
+      "market": "SYN-A",
+      "family": "Synthetic trend model",
+      "stage": "MONITORING",
+      "status": "healthy",
+      "allocation_pct": 28,
+      "score": 91,
+      "stability": 88,
+      "observations": 184,
+      "monthly_return_pct": 1.18,
+      "drawdown_pct": 1.24
+    },
+    {
+      "id": "DEMO-BOR-02",
+      "name": "Boreal Pulse",
+      "market": "SYN-B",
+      "family": "Synthetic reversion model",
+      "stage": "PAPER",
+      "status": "healthy",
+      "allocation_pct": 24,
+      "score": 87,
+      "stability": 84,
+      "observations": 151,
+      "monthly_return_pct": 0.76,
+      "drawdown_pct": 0.98
+    },
+    {
+      "id": "DEMO-ATL-03",
+      "name": "Atlas Drift",
+      "market": "SYN-C",
+      "family": "Synthetic relative-value model",
+      "stage": "VALIDATION",
+      "status": "review",
+      "allocation_pct": 18,
+      "score": 79,
+      "stability": 81,
+      "observations": 127,
+      "monthly_return_pct": 0.39,
+      "drawdown_pct": 1.41
+    },
+    {
+      "id": "DEMO-NER-04",
+      "name": "Nereid Echo",
+      "market": "SYN-D",
+      "family": "Synthetic volatility model",
+      "stage": "RESEARCH",
+      "status": "paused",
+      "allocation_pct": 0,
+      "score": 73,
+      "stability": 75,
+      "observations": 96,
+      "monthly_return_pct": -0.12,
+      "drawdown_pct": 2.05
+    },
+    {
+      "id": "DEMO-LUM-05",
+      "name": "Lumen Harbor",
+      "market": "SYN-E",
+      "family": "Synthetic defensive model",
+      "stage": "MONITORING",
+      "status": "healthy",
+      "allocation_pct": 30,
+      "score": 89,
+      "stability": 92,
+      "observations": 203,
+      "monthly_return_pct": 0.91,
+      "drawdown_pct": 0.72
+    }
+  ],
+  "pipeline": [
+    {
+      "id": "DISCOVERY",
+      "label_es": "Descubrimiento",
+      "label_en": "Discovery",
+      "count": 12,
+      "tone": "slate"
+    },
+    {
+      "id": "VALIDATION",
+      "label_es": "Validacion",
+      "label_en": "Validation",
+      "count": 5,
+      "tone": "amber"
+    },
+    {
+      "id": "PAPER",
+      "label_es": "Simulacion",
+      "label_en": "Simulation",
+      "count": 3,
+      "tone": "violet"
+    },
+    {
+      "id": "MONITORING",
+      "label_es": "Monitorizacion",
+      "label_en": "Monitoring",
+      "count": 2,
+      "tone": "emerald"
+    }
+  ],
+  "correlation": {
+    "labels": ["Helios", "Boreal", "Atlas", "Lumen"],
+    "matrix": [
+      [1.0, 0.18, -0.07, 0.22],
+      [0.18, 1.0, 0.31, 0.09],
+      [-0.07, 0.31, 1.0, -0.14],
+      [0.22, 0.09, -0.14, 1.0]
+    ]
+  },
+  "events": [
+    {
+      "time": "09:30",
+      "type": "validation",
+      "title_es": "Ciclo sintetico completado",
+      "title_en": "Synthetic cycle completed",
+      "detail_es": "Se recalcularon las metricas de demostracion con una semilla determinista.",
+      "detail_en": "Demo metrics were recalculated from a deterministic seed."
+    },
+    {
+      "time": "09:18",
+      "type": "risk",
+      "title_es": "Exposicion dentro del rango de demostracion",
+      "title_en": "Exposure within demo range",
+      "detail_es": "El escenario sintetico permanece en estado controlado.",
+      "detail_en": "The synthetic scenario remains in a controlled state."
+    },
+    {
+      "time": "08:52",
+      "type": "review",
+      "title_es": "Atlas Drift requiere revision",
+      "title_en": "Atlas Drift requires review",
+      "detail_es": "Evento ficticio para demostrar el flujo de decisiones humanas.",
+      "detail_en": "Fictional event demonstrating the human decision workflow."
+    }
+  ]
+}

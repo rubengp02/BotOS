@@ -1,0 +1,13 @@
+[project]
+name = "botos-public-demo"
+version = "1.0.0"
+description = "Static BotOS portfolio demo with deterministic synthetic data"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
