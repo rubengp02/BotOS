@@ -8,33 +8,33 @@
 
 **[Abrir la demo](https://rubengp02.github.io/BotOS/)** · [English](#english)
 
-## Espanol
+## Español
 
-BotOS es una demostracion de portfolio sobre la ingenieria de un sistema de supervision para estrategias cuantitativas. Esta edicion publica reutiliza el lenguaje visual y la estructura del dashboard local, pero sustituye deliberadamente el motor privado y todas las integraciones operativas por datos sinteticos deterministas.
+BotOS es una demostración de portfolio sobre la ingeniería de un sistema de supervisión para estrategias cuantitativas. Esta edición pública reutiliza el lenguaje visual y la estructura del dashboard local, pero sustituye deliberadamente el motor privado y todas las integraciones operativas por datos sintéticos deterministas.
 
-El objetivo es mostrar capacidades de ingenieria de software —arquitectura, modelado de estados, visualizacion, trazabilidad, controles de riesgo y automatizacion de calidad— sin publicar propiedad intelectual cuantitativa ni datos sensibles.
+El objetivo es mostrar capacidades de ingeniería de software —arquitectura, modelado de estados, visualización, trazabilidad, controles de riesgo y automatización de calidad— sin publicar propiedad intelectual cuantitativa ni datos sensibles.
 
-### Que se puede probar
+### Qué se puede probar
 
-- Dashboard responsive en espanol e ingles.
-- Escenarios deterministas de base, estres y recuperacion.
-- Pipeline visual desde exploracion hasta monitorizacion.
-- Portfolio sintetico, curva ilustrativa y matriz de correlacion ficticia.
-- Registro de decisiones y controles de auditoria de la edicion publica.
-- Validacion automatica contra secretos, rutas personales y artefactos operativos.
+- Dashboard responsive en español e inglés.
+- Escenarios deterministas de base, estrés y recuperación.
+- Pipeline visual desde exploración hasta monitorización.
+- Portfolio sintético, curva ilustrativa y matriz de correlación ficticia.
+- Registro de decisiones y controles de auditoría de la edición pública.
+- Validación automática contra secretos, rutas personales y artefactos operativos.
 
-### Limites de seguridad
+### Límites de seguridad
 
-La demo publica **no** incluye:
+La demo pública **no** incluye:
 
-- codigo, presets, nombres o parametros de estrategias reales;
+- código, presets, nombres o parámetros de estrategias reales;
 - credenciales, tokens, correos, claves de API o rutas personales;
-- bases de datos, XML de optimizacion, logs o estados del runtime local;
+- bases de datos, XML de optimización, logs o estados del runtime local;
 - resultados reales, backtests, operaciones, cuentas o evidencia de MetaTrader;
-- conexion a brokers, MetaTrader, bridges locales o endpoints privados;
-- capacidad para enviar ordenes o modificar el sistema local.
+- conexión a brokers, MetaTrader, bridges locales o endpoints privados;
+- capacidad para enviar órdenes o modificar el sistema local.
 
-El sistema privado y esta demo son dos productos aislados. La web es estatica y funciona exclusivamente con [`data/demo_portfolio.json`](data/demo_portfolio.json).
+El sistema privado y esta demo son dos productos aislados. La web es estática y funciona exclusivamente con [`data/demo_portfolio.json`](data/demo_portfolio.json).
 
 ### Ejecutar localmente
 
@@ -44,16 +44,16 @@ Requiere Python 3.12 o posterior:
 python -m http.server 8000
 ```
 
-Abre `http://localhost:8000`. El servidor solo entrega los archivos estaticos de esta carpeta.
+Abre `http://localhost:8000`. El servidor solo entrega los archivos estáticos de esta carpeta.
 
-### Validacion
+### Validación
 
 ```powershell
 python tools/validate_public_release.py
 python -m unittest discover -s tests -v
 ```
 
-El validador comprueba el contrato sintetico, extensiones prohibidas, patrones de secretos, rutas locales, referencias a estrategias privadas y destinos de red no permitidos.
+El validador comprueba el contrato sintético, extensiones prohibidas, patrones de secretos, rutas locales, referencias a estrategias privadas y destinos de red no permitidos.
 
 ### Arquitectura
 
@@ -61,24 +61,24 @@ El validador comprueba el contrato sintetico, extensiones prohibidas, patrones d
 GitHub Pages
     |
     +-- index.html          Interfaz derivada del dashboard local
-    +-- js/*.js             Logica de cliente y escenarios adaptados
-    +-- data/*.json         Dataset publico, ficticio y auditable
-    +-- tools/              Gate de seguridad de publicacion
+    +-- js/*.js             Lógica de cliente y escenarios adaptados
+    +-- data/*.json         Dataset público, ficticio y auditable
+    +-- tools/              Gate de seguridad de publicación
     +-- tests/              Contratos reproducibles
 ```
 
-La separacion completa entre la edicion publica y el runtime privado se documenta en [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+La separación completa entre la edición pública y el runtime privado se documenta en [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-### Tecnologias
+### Tecnologías
 
 - HTML5, JavaScript vanilla y CSS responsive.
-- Chart.js para visualizaciones y Lucide para iconografia.
-- Python 3.12 para validacion y pruebas sin dependencias de runtime.
-- GitHub Actions y GitHub Pages para CI/CD estatico.
+- Chart.js para visualizaciones y Lucide para iconografía.
+- Python 3.12 para validación y pruebas sin dependencias de runtime.
+- GitHub Actions y GitHub Pages para CI/CD estático.
 
 ### Uso profesional
 
-Este repositorio esta preparado como muestra tecnica personal. Expone decisiones de arquitectura, seguridad de publicacion, experiencia de usuario y calidad de entrega, no el contenido cuantitativo privado que sustenta el sistema local.
+Este repositorio está preparado como muestra técnica personal. Expone decisiones de arquitectura, seguridad de publicación, experiencia de usuario y calidad de entrega, no el contenido cuantitativo privado que sustenta el sistema local.
 
 ### Aviso
 
