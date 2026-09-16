@@ -4,7 +4,7 @@
 [![CI](https://github.com/rubengp02/BotOS/actions/workflows/ci.yml/badge.svg)](https://github.com/rubengp02/BotOS/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-4f8cff.svg)](LICENSE)
 
-> **Demo publica:** todos los nombres, mercados, eventos, metricas y resultados de este repositorio son ficticios. No contiene estrategias, parametros, credenciales, operaciones ni evidencia de trading reales.
+> **Demo pública:** Por motivos de estricta privacidad, seguridad y protección de la propiedad intelectual, **los datos reales de operación no se comparten bajo ningún concepto**. Todos los nombres, mercados, eventos, métricas y resultados mostrados en este repositorio son 100% **datos sintéticos ficticios**. No contiene estrategias, parámetros, credenciales, operaciones ni evidencia de trading reales.
 
 **[Abrir la demo](https://rubengp02.github.io/BotOS/)** · [English](#english)
 
@@ -61,7 +61,7 @@ El validador comprueba el contrato sintetico, extensiones prohibidas, patrones d
 GitHub Pages
     |
     +-- index.html          Interfaz derivada del dashboard local
-    +-- js/app.js           Adaptador y escenarios deterministas
+    +-- js/*.js             Logica de cliente y escenarios adaptados
     +-- data/*.json         Dataset publico, ficticio y auditable
     +-- tools/              Gate de seguridad de publicacion
     +-- tests/              Contratos reproducibles

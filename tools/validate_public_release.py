@@ -32,13 +32,8 @@ FORBIDDEN_NAMES = {
     "optimizations.db",
 }
 
-# Private identifiers are intentionally listed only in this non-deployed validator.
-PRIVATE_IDENTIFIERS = (
-    "Jacko",
-    "Cluti",
-    "StratOS",
-    "CRT_PO3",
-)
+# Private identifiers check is handled locally outside this public repo to avoid leaking them.
+PRIVATE_IDENTIFIERS = ()
 
 SECRET_PATTERNS = {
     "email address": re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.IGNORECASE),
@@ -126,12 +121,16 @@ def validate_text_content(files: list[Path]) -> list[str]:
 
 def validate_network_boundary() -> list[str]:
     errors: list[str] = []
-    app_text = (ROOT / "js" / "app.js").read_text(encoding="utf-8")
-    for forbidden in ("127.0.0.1", "localhost", "/api/", "WebSocket"):
-        if forbidden.casefold() in app_text.casefold():
-            errors.append(f"public JavaScript contains forbidden runtime reference: {forbidden}")
+    
+    js_files = list((ROOT / "js").rglob("*.js"))
+    for js_path in js_files:
+        app_text = js_path.read_text(encoding="utf-8")
+        for forbidden in ("127.0.0.1", "localhost", "/api/", "WebSocket"):
+            if forbidden.casefold() in app_text.casefold():
+                errors.append(f"public JavaScript contains forbidden runtime reference in {js_path.name}: {forbidden}")
 
     for path in (ROOT / "index.html", ROOT / "README.md"):
+        if not path.exists(): continue
         text = path.read_text(encoding="utf-8")
         for raw_url in re.findall(r"https?://[^\s\"')>]+", text):
             hostname = urlparse(raw_url).hostname

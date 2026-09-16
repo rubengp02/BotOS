@@ -30,15 +30,15 @@ class PublicReleaseContractTests(unittest.TestCase):
         self.assertTrue(all(item["market"].startswith("SYN-") for item in payload["strategies"]))
 
     def test_frontend_has_no_private_runtime_endpoint(self) -> None:
-        script = (ROOT / "js" / "app.js").read_text(encoding="utf-8").casefold()
-        for forbidden in ("127.0.0.1", "localhost", "/api/", "websocket"):
-            self.assertNotIn(forbidden, script)
+        for js_path in (ROOT / "js").rglob("*.js"):
+            script = js_path.read_text(encoding="utf-8").casefold()
+            for forbidden in ("127.0.0.1", "localhost", "/api/", "websocket"):
+                self.assertNotIn(forbidden, script)
 
     def test_static_entrypoint_reuses_public_dashboard_contract(self) -> None:
         html = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn("derived from dashboard_portfolio_quant.html", html)
         self.assertIn("PUBLIC DEMO", html)
-        self.assertIn("js/app.js", html)
 
 
 if __name__ == "__main__":
